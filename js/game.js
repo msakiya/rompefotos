@@ -152,6 +152,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (err) {
             console.error('Failed to save score or fetch leaderboard', err);
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = `<li style="color:var(--text-muted); text-align:center; font-size: 0.9rem;">Estás jugando sin conexión.<br>Tu tiempo no fue guardado en el ranking.</li>`;
         }
     }
 
