@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Juego de rompecabezas con tus propias fotos - Jugar</title>
+    <meta name="description" content="Arma el rompecabezas deslizante con tus propias fotos en diferentes niveles de dificultad.">
+    <meta name="keywords" content="rompecabezas, puzzle, fotos, juego, HTML5, pwa">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/assets/icon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="game-body">
+    <nav class="navbar glass-panel">
+        <button id="back-btn" class="btn btn-sm btn-outline">← Volver</button>
+        <div class="stats">
+            <span class="gradient-text">Movimientos: <span id="moves-count">0</span></span>
+        </div>
+    </nav>
+
+    <div class="game-container">
+        <!-- Level Selection Modal -->
+        <div id="level-selection" class="glass-panel text-center">
+            <h3>Selecciona la dificultad</h3>
+            <div class="level-buttons">
+                <button class="btn btn-primary level-btn" data-size="4">4 x 4 (Fácil)</button>
+                <button class="btn btn-primary level-btn" data-size="5">5 x 5 (Medio)</button>
+                <button class="btn btn-primary level-btn" data-size="6">6 x 6 (Difícil)</button>
+            </div>
+            <!-- Original Image Preview -->
+            <div class="preview-container">
+                <p>Imagen a armar:</p>
+                <img id="preview-img" src="" alt="Preview">
+            </div>
+        </div>
+
+        <!-- Puzzle Area -->
+        <div id="puzzle-area" style="display: none;">
+            <div id="puzzle-grid" class="puzzle-grid"></div>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="modal">
+        <div class="modal-content glass-panel text-center">
+            <h2 class="gradient-text">¡Felicidades!</h2>
+            <p>Has completado el rompecabezas en <strong id="final-moves"></strong> movimientos.</p>
+            
+            <div class="ranking-section">
+                <h3>Tu Ranking (Mejores Tiempos)</h3>
+                <ul id="leaderboard-list" class="leaderboard-list">
+                    <!-- Loaded via JS -->
+                </ul>
+            </div>
+
+            <div class="modal-actions">
+                <button id="play-again-btn" class="btn btn-primary">Jugar de nuevo</button>
+                <button id="dashboard-btn" class="btn btn-secondary">Ir a mis fotos</button>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 3rem; padding-bottom: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+        Creado por <a href="https://comunidadcpe.com" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">Comunidadcpe</a>
+    </footer>
+
+    <script src="js/api.js?v=3"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+    <script src="js/game.js?v=3"></script>
+</body>
+</html>

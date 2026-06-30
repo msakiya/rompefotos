@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Date: Tue, 30 Jun 2026 20:10:27 GMT
+Server: Apache
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0
+Pragma: no-cache
+Set-Cookie: PHPSESSID=bb67ac617c0c17d12b53b5044c93a4fc; path=/
+Upgrade: h2
+Connection: Upgrade
+Vary: User-Agent
+Transfer-Encoding: chunked
+Content-Type: application/json
+
+{"status":"success","message":"Registration successful"}

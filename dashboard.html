@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Juego de rompecabezas con tus propias fotos - Dashboard</title>
+    <meta name="description" content="Sube tus fotos, guárdalas y juega armándolas como rompecabezas deslizantes.">
+    <meta name="keywords" content="rompecabezas, puzzle, fotos, juego, HTML5, pwa">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/assets/icon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+    <nav class="navbar glass-panel">
+        <h2 class="gradient-text">Mis Fotos</h2>
+        <button id="logout-btn" class="btn btn-sm btn-outline">Salir</button>
+    </nav>
+
+    <div class="container">
+        <!-- Upload Section -->
+        <div class="upload-section glass-panel">
+            <h3>Sube una nueva foto</h3>
+            <p>Juega un nuevo rompecabezas</p>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="file-upload-wrapper">
+                    <label for="photo-upload" class="file-upload-label">
+                        <span id="file-name">Seleccionar imagen (JPG, PNG, WEBP)</span>
+                    </label>
+                    <input type="file" id="photo-upload" name="photo" accept="image/jpeg, image/png, image/webp" required style="display: none;">
+                </div>
+                <button type="submit" class="btn btn-primary" id="upload-btn" disabled>Subir y Jugar</button>
+            </form>
+            <div id="upload-status"></div>
+        </div>
+
+        <!-- Gallery Section -->
+        <h3>Galería</h3>
+        <div id="gallery-container" class="gallery-grid">
+            <!-- Images will be loaded here via JS -->
+            <div class="loading-spinner">Cargando tus fotos...</div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 3rem; padding-bottom: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+        Creado por <a href="https://comunidadcpe.com" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">Comunidadcpe</a>
+    </footer>
+
+    <script src="js/api.js?v=3"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+    <script src="js/dashboard.js?v=3"></script>
+</body>
+</html>
