@@ -71,4 +71,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             errorDiv.textContent = err.message;
         }
     });
+
+    // Handle Guest Mode
+    document.getElementById('guest-btn').addEventListener('click', () => {
+        sessionStorage.setItem('guestMode', 'true');
+        window.location.href = 'dashboard.html';
+    });
 });

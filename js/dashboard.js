@@ -1,12 +1,25 @@
 // js/dashboard.js
 document.addEventListener('DOMContentLoaded', async () => {
-    const isLoggedIn = await checkAuth();
-    if (!isLoggedIn) {
-        window.location.href = 'index.html';
-        return;
+    const isGuest = sessionStorage.getItem('guestMode') === 'true';
+    if (!isGuest) {
+        const isLoggedIn = await checkAuth();
+        if (!isLoggedIn) {
+            window.location.href = 'index.html';
+            return;
+        }
+    } else {
+        document.querySelector('.dashboard-header h1').textContent = 'Modo Invitado';
+        document.getElementById('logout-btn').textContent = 'Salir';
     }
 
-    document.getElementById('logout-btn').addEventListener('click', logout);
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        if (isGuest) {
+            sessionStorage.removeItem('guestMode');
+            window.location.href = 'index.html';
+        } else {
+            logout();
+        }
+    });
 
     const fileInput = document.getElementById('photo-upload');
     const fileNameDisplay = document.getElementById('file-name');
@@ -37,6 +50,46 @@ document.addEventListener('DOMContentLoaded', async () => {
         uploadBtn.disabled = true;
         uploadBtn.textContent = 'Subiendo...';
         statusDiv.textContent = '';
+
+        if (isGuest) {
+            // Local processing for Guest Mode
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    sessionStorage.setItem('currentPhotoId', 'guest');
+                    sessionStorage.setItem('currentPhotoUrl', dataUrl);
+                    window.location.href = 'game.html';
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+            return;
+        }
 
         try {
             const response = await fetch('api/upload.php', {
@@ -111,5 +164,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    loadGallery();
+    if (isGuest) {
+        galleryContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Estás en Modo Invitado.<br><br>¡Sube una foto arriba para jugar inmediatamente!<br><small>(Tus fotos no se guardarán al salir)</small></p>';
+    } else {
+        loadGallery();
+    }
 });

@@ -1,9 +1,12 @@
 // js/game.js
 document.addEventListener('DOMContentLoaded', async () => {
-    const isLoggedIn = await checkAuth();
-    if (!isLoggedIn) {
-        window.location.href = 'index.html';
-        return;
+    const isGuest = sessionStorage.getItem('guestMode') === 'true';
+    if (!isGuest) {
+        const isLoggedIn = await checkAuth();
+        if (!isLoggedIn) {
+            window.location.href = 'index.html';
+            return;
+        }
     }
 
     const photoId = sessionStorage.getItem('currentPhotoId');
@@ -132,28 +135,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('final-moves').textContent = moves;
         winModal.classList.add('active');
 
-        try {
-            // Save score
-            await fetchAPI('scores.php', 'POST', {
-                photo_id: photoId,
-                grid_size: gridSize,
-                moves: moves
-            });
+        if (isGuest) {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = `<li style="color:var(--text-muted); text-align:center; font-size: 0.9rem;">Estás jugando como invitado.<br>Tus récords de tiempo no se guardarán.</li>`;
+        } else {
+            try {
+                // Save score
+                await fetchAPI('scores.php', 'POST', {
+                    photo_id: photoId,
+                    grid_size: gridSize,
+                    moves: moves
+                });
 
-            // Fetch leaderboard
-            const data = await fetchAPI(`scores.php?action=leaderboard&photo_id=${photoId}`);
-            const list = document.getElementById('leaderboard-list');
-            list.innerHTML = '';
-            
-            data.scores.forEach((s, i) => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>#${i+1} (${s.grid_size}x${s.grid_size})</span> <span><strong>${s.moves}</strong> movs</span>`;
-                list.appendChild(li);
-            });
-        } catch (err) {
-            console.error('Failed to save score or fetch leaderboard', err);
-            const list = document.getElementById('leaderboard-list');
-            list.innerHTML = `<li style="color:var(--text-muted); text-align:center; font-size: 0.9rem;">Estás jugando sin conexión.<br>Tu tiempo no fue guardado en el ranking.</li>`;
+                // Fetch leaderboard
+                const data = await fetchAPI(`scores.php?action=leaderboard&photo_id=${photoId}`);
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = '';
+                
+                data.scores.forEach((s, i) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>#${i+1} (${s.grid_size}x${s.grid_size})</span> <span><strong>${s.moves}</strong> movs</span>`;
+                    list.appendChild(li);
+                });
+            } catch (err) {
+                console.error('Failed to save score or fetch leaderboard', err);
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = `<li style="color:var(--text-muted); text-align:center; font-size: 0.9rem;">Estás jugando sin conexión.<br>Tu tiempo no fue guardado en el ranking.</li>`;
+            }
         }
     }
 
