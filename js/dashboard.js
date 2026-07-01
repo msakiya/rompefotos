@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
     } else {
-        document.querySelector('.dashboard-header h1').textContent = 'Modo Invitado';
+        document.querySelector('.navbar h2').textContent = 'Modo Invitado';
         document.getElementById('logout-btn').textContent = 'Salir';
     }
 
@@ -51,66 +51,72 @@ document.addEventListener('DOMContentLoaded', async () => {
         uploadBtn.textContent = 'Subiendo...';
         statusDiv.textContent = '';
 
-        if (isGuest) {
-            // Local processing for Guest Mode
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1200;
-                    const MAX_HEIGHT = 1200;
-                    let width = img.width;
-                    let height = img.height;
+        // Common Image Resizing Logic
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
+                let width = img.width;
+                let height = img.height;
 
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
                     }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+                if (isGuest) {
                     sessionStorage.setItem('currentPhotoId', 'guest');
                     sessionStorage.setItem('currentPhotoUrl', dataUrl);
                     window.location.href = 'game.html';
-                };
-                img.src = event.target.result;
+                } else {
+                    // Authenticated User: Convert dataUrl back to Blob to upload
+                    const res = await fetch(dataUrl);
+                    const blob = await res.blob();
+                    
+                    const formData = new FormData();
+                    formData.append('photo', blob, 'photo.jpg');
+
+                    try {
+                        const response = await fetch('api/upload.php', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'include'
+                        });
+                        const data = await response.json();
+                        
+                        if (!response.ok) throw new Error(data.message);
+
+                        sessionStorage.setItem('currentPhotoId', data.photo.id);
+                        sessionStorage.setItem('currentPhotoUrl', data.photo.url);
+                        window.location.href = 'game.html';
+                    } catch (err) {
+                        statusDiv.innerHTML = `<span style="color: var(--danger)">${err.message}</span>`;
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = 'Subir y Jugar';
+                    }
+                }
             };
-            reader.readAsDataURL(file);
-            return;
-        }
-
-        try {
-            const response = await fetch('api/upload.php', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            });
-            const data = await response.json();
-            
-            if (!response.ok) throw new Error(data.message);
-
-            // Go to game with new photo ID and URL
-            sessionStorage.setItem('currentPhotoId', data.photo.id);
-            sessionStorage.setItem('currentPhotoUrl', data.photo.url);
-            window.location.href = 'game.html';
-
-        } catch (err) {
-            statusDiv.innerHTML = `<span style="color: var(--danger)">${err.message}</span>`;
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = 'Subir y Jugar';
-        }
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
     });
 
     // Load Gallery
